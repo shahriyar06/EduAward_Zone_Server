@@ -57,6 +57,19 @@ async function run() {
       res.send(result);
     })
 
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const update = req.body;
+      const updateduser = {
+        $set: {
+          role: update.role
+        }
+      }
+      const result = await usercollection.updateOne(filter, updateduser);
+      res.send(result);
+    })
+
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
