@@ -8,14 +8,14 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors(
-    {
-        origin: [
-            "http://localhost:5173"
-            // "https://kajer-khoj.web.app",
-            // "https://kajer-khoj.firebaseapp.com"
-        ],
-        credentials: true,
-    }
+  {
+    origin: [
+      "http://localhost:5173"
+      // "https://kajer-khoj.web.app",
+      // "https://kajer-khoj.firebaseapp.com"
+    ],
+    credentials: true,
+  }
 ));
 app.use(express.json());
 
@@ -36,6 +36,24 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+
+    const usercollection = client.db('EduawardDB').collection('users');
+
+
+    // User related Api
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email}
+      const existingUser = await usercollection.findOne(query);
+      if(existingUser){
+        return res.send({message: 'user already exists', insertedId: null})
+      }
+      const result = await usercollection.insertOne(user);
+      res.send(result);
+    })
+
+
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -49,9 +67,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('EduAward-Zone-server is running...')
+  res.send('EduAward-Zone-server is running...')
 })
 
 app.listen(port, () => {
-    console.log(`EduAward-Zone-server is running on port : ${port}`)
+  console.log(`EduAward-Zone-server is running on port : ${port}`)
 })
