@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const cors = require('cors');
 const app = express();
@@ -54,6 +54,13 @@ async function run() {
         return res.send({ message: 'user already exists', insertedId: null })
       }
       const result = await usercollection.insertOne(user);
+      res.send(result);
+    })
+
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usercollection.deleteOne(query);
       res.send(result);
     })
 
