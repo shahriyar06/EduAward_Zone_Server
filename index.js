@@ -44,44 +44,44 @@ async function run() {
     // JWT related Api
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token =  jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-      res.send({token});
-      })
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+      res.send({ token });
+    })
 
     // Middlewares
-    const verifyToken = (req, res, next) =>{
-      if(!req.headers.authorization){
-        return res.status(401).send({message: 'unauthorized access'});
+    const verifyToken = (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'unauthorized access' });
       }
       const token = req.headers.authorization.split(' ')[1]
-      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
-        if(err){
-          return res.status(401).send({message: 'unauthorized access'});
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: 'unauthorized access' });
         }
-        req.decoded= decoded;
+        req.decoded = decoded;
         next();
       })
     }
 
 
-    const verifyAdmin = async (req, res, next) =>{
+    const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
-      const query = {email: email};
+      const query = { email: email };
       const user = await usercollection.findOne(query);
       const isAdmin = user.role === 'Admin';
-      if(!isAdmin){
-        return res.status(403).send({message: 'forbidden access'});
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' });
       }
       next();
     }
 
-    const verifyModerator = async (req, res, next) =>{
+    const verifyModerator = async (req, res, next) => {
       const email = req.decoded.email;
-      const query = {email: email};
+      const query = { email: email };
       const user = await usercollection.findOne(query);
       const isModerator = user.role === 'Moderator';
-      if(!isModerator){
-        return res.status(403).send({message: 'forbidden access'});
+      if (!isModerator) {
+        return res.status(403).send({ message: 'forbidden access' });
       }
       next();
     }
@@ -101,30 +101,30 @@ async function run() {
 
     app.get('/users/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
-      if(email !== req.decoded.email){
-        return res.status(403).send({message: 'forbidden access'});
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
       }
-      const query = {email: email};
+      const query = { email: email };
       const user = await usercollection.findOne(query);
-      let admin = false ;
-      if(user){
+      let admin = false;
+      if (user) {
         admin = user?.role === 'Admin';
       }
-      res.send({admin});
+      res.send({ admin });
     })
 
     app.get('/users/moderator/:email', verifyToken, verifyModerator, async (req, res) => {
       const email = req.params.email;
-      if(email !== req.decoded.email){
-        return res.status(403).send({message: 'forbidden access'});
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
       }
-      const query = {email: email};
+      const query = { email: email };
       const user = await usercollection.findOne(query);
-      let moderator = false ;
-      if(user){
+      let moderator = false;
+      if (user) {
         moderator = user?.role === 'Moderator';
       }
-      res.send({moderator});
+      res.send({ moderator });
     })
 
     app.post('/users', async (req, res) => {
@@ -160,7 +160,12 @@ async function run() {
 
 
     // Schoarship related api
-    app.post('/scholarships', async (req, res)=>{
+    app.get('/scholarships', verifyToken, async (req, res) => {
+      const result = await scholarshipcollection.find().toArray();
+      res.send(result);
+    })
+
+    app.post('/scholarships', verifyToken, async (req, res) => {
       const scholarship = req.body;
       const result = await scholarshipcollection.insertOne(scholarship);
       res.send(result);
