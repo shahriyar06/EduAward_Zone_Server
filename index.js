@@ -160,10 +160,17 @@ async function run() {
 
 
     // Schoarship related api
-    app.get('/scholarships', verifyToken, async (req, res) => {
+    app.get('/scholarships',  async (req, res) => {
       const result = await scholarshipcollection.find().toArray();
       res.send(result);
     })
+
+    app.get('/scholarships/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await scholarshipcollection.findOne(query);
+      res.send(result);
+  })
 
     app.post('/scholarships', verifyToken, async (req, res) => {
       const scholarship = req.body;
