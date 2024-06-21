@@ -39,6 +39,7 @@ async function run() {
     // await client.connect();
 
     const usercollection = client.db('EduawardDB').collection('users');
+    const scholarshipcollection = client.db('EduawardDB').collection('scholarships');
 
     // JWT related Api
     app.post('/jwt', async (req, res) => {
@@ -89,6 +90,12 @@ async function run() {
     // User related Api
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       const result = await usercollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/users/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const result = await usercollection.findOne(email);
       res.send(result);
     })
 
@@ -152,6 +159,12 @@ async function run() {
     })
 
 
+    // Schoarship related api
+    app.post('/scholarships', async (req, res)=>{
+      const scholarship = req.body;
+      const result = await scholarshipcollection.insertOne(scholarship);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
