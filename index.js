@@ -225,11 +225,19 @@ async function run() {
 
 
     // Application related api
+    app.get('/applications', async (req, res) => {
+      const result = await applicationCollection.find().toArray();
+      res.send(result);
+    })
+
+
     app.post('/applications', async (req, res) => {
       const application = req.body;
       const result = await applicationCollection.insertOne(application);
       res.send(result);
     })
+
+    
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
