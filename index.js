@@ -237,6 +237,13 @@ async function run() {
       res.send(result);
     })
 
+    app.delete('/applications/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await applicationCollection.deleteOne(query);
+      res.send(result);
+    })
+
     
 
     // Send a ping to confirm a successful connection
