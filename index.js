@@ -21,7 +21,7 @@ app.use(cors(
 app.use(express.json());
 
 
-
+const stripe = require("stripe")('sk_test_51PUNaqIlyHzunZkKYBXkWmM42ZK6yAVKHhDKPFOmEaR4YSHATJi7RyUDuqqO50HTYGZepr4JxKSprEqh7yHzgUhB00P9DzZCvz');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_USER_PASS}@cluster0.qexkjce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -40,6 +40,7 @@ async function run() {
 
     const usercollection = client.db('EduawardDB').collection('users');
     const scholarshipcollection = client.db('EduawardDB').collection('scholarships');
+    const paymentCollection = client.db('EduawardDB').collection('payments');
 
     // JWT related Api
     app.post('/jwt', async (req, res) => {
@@ -160,7 +161,7 @@ async function run() {
 
 
     // Schoarship related api
-    app.get('/scholarships',  async (req, res) => {
+    app.get('/scholarships', async (req, res) => {
       const result = await scholarshipcollection.find().toArray();
       res.send(result);
     })
@@ -170,7 +171,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await scholarshipcollection.findOne(query);
       res.send(result);
-  })
+    })
 
     app.post('/scholarships', verifyToken, async (req, res) => {
       const scholarship = req.body;
@@ -183,6 +184,50 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await scholarshipcollection.deleteOne(query);
       res.send(result);
+    })
+
+    // Payment Api
+    // server for the payment gateway Stripe
+
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100)
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+
+
+    app.get('/payments/:email', async (req, res) => {
+
+      const query = { email: req.params.email };
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
+    // save payment data and clear users cart
+    app.post('/payments', async (req, res) => {
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      // const query = {
+      //   _id: {
+      //     $in: payment.cartIds.map(id => new ObjectId(id))
+      //   }
+      // }
+
+      // const deleteResult = await cartCollection.deleteMany(query);
+      res.send({ paymentResult})
     })
 
     // Send a ping to confirm a successful connection
