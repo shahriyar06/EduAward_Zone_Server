@@ -8,16 +8,17 @@ const port = process.env.PORT || 5000;
 
 
 // middleware
-app.use(cors(
-  {
-    origin: [
-      "http://localhost:5173"
-      // "https://kajer-khoj.web.app",
-      // "https://kajer-khoj.firebaseapp.com"
-    ],
-    credentials: true,
-  }
-));
+app.use(cors());
+// app.use(cors(
+//   {
+//     origin: [
+//       "http://localhost:5173"
+//       // "https://edu-award-zone.web.app",
+//       // "https://edu-award-zone.firebaseapp.com"
+//     ],
+//     credentials: true,
+//   }
+// ));
 app.use(express.json());
 
 
@@ -253,6 +254,11 @@ async function run() {
     })
 
     // Review api
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    })
+
     app.post('/reviews', async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
