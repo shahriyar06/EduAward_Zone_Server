@@ -42,6 +42,7 @@ async function run() {
     const scholarshipcollection = client.db('EduawardDB').collection('scholarships');
     const paymentCollection = client.db('EduawardDB').collection('payments');
     const applicationCollection = client.db('EduawardDB').collection('applications');
+    const reviewCollection = client.db('EduawardDB').collection('reviews');
 
     // JWT related Api
     app.post('/jwt', async (req, res) => {
@@ -230,6 +231,13 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/applications/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await applicationCollection.findOne(query);
+      res.send(result);
+    })
+
 
     app.post('/applications', async (req, res) => {
       const application = req.body;
@@ -244,7 +252,12 @@ async function run() {
       res.send(result);
     })
 
-    
+    // Review api
+    app.post('/reviews', async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
