@@ -246,6 +246,19 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/applications/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedapplication = req.body;
+      const update = {
+        $set: {
+          status: updatedapplication.status
+        }
+      }
+      const result = await applicationCollection.updateOne(filter, updatedapplication);
+      res.send(result);
+    })
+
     app.delete('/applications/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -262,6 +275,13 @@ async function run() {
     app.post('/reviews', async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    })
+
+    app.delete('/reviews/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reviewCollection.deleteOne(query);
       res.send(result);
     })
 
